@@ -1,0 +1,43 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Flappy Bird</title>
+    <!--
+        Game library.
+        src:
+            https://github.com/CreateJS
+            http://code.createjs.com/
+    -->
+    <script src="lib/createjs-2014.12.12.combined.js"></script>
+    <!--
+        Collision Detector for EaselJS Bitmaps and BitmapAnimations
+        src: https://github.com/olsn/Collision-Detection-for-EaselJS
+    -->
+    <script src="lib/ndgmr.Collision.js"></script>
+
+    <!--// Value Object-->
+    <script src="basic/Event.js"></script>
+    <script src="basic/ResourceName.js"></script>
+    <script src="basic/Animations.js"></script>
+
+    <!--// Game files -->
+    <script src="Flappy.js"></script>
+
+    <script src="component/Background.js"></script>
+    <script src="component/Pipe.js"></script>
+    <script src="component/Bird.js"></script>
+    <script src="component/Ground.js"></script>
+    <script src="component/Button.js"></script>
+    <script src="component/Score.js"></script>
+
+    <script src="Constant.js"></script>
+    <script src="Environment.js"></script>
+</head>
+
+<body onload="FlappyBird.init();" style="text-align: center;">
+    <canvas id="gameFrame" style="height: 100%; max-width: 100%;" height="1024" width="768"></canvas>
+</body>
+</html>
