@@ -39,6 +39,37 @@ var Bird = (function () {
         fly: function () {
             bird.framerate = FRAME_RATE_ON_PLAY;
             bird.gotoAndPlay(Animations.FLY);
+        },
+        jump: function (game) {
+        	game.rotationDelta = bird.rotation < 0 ? (-bird.rotation - 20) / 5 : (bird.rotation + 20) / 5;
+
+            Factory.Tween.get(bird)
+                .to({y:bird.y - game.rotationDelta, rotation: - 20}, game.rotationDelta, Factory.Ease.linear) //rotate to jump position and jump bird
+                .to({y:bird.y - JUMP_AMOUNT, rotation: - 20}, JUMP_TIME - game.rotationDelta, Factory.Ease.quadOut) //rotate to jump position and jump bird
+                .to({y:bird.y}, JUMP_TIME, Factory.Ease.quadIn) //reverse jump for smooth arch
+                .to({y:bird.y + 200, rotation: 90}, (DURATION)/1.5, Factory.Ease.linear) //rotate back
+                .call(Bird.dive, [], {}) // change bird to diving position
+                .to({y:game.floor.y - 30}, (game.frameHeight - (game.bird.y+200))/1.5, Factory.Ease.linear); //drop to the bedrock
+        },
+        dead: function(){
+			Factory.Tween.removeTweens(bird);
+
+	        // Set bird dropped on the floor
+	        Factory.Tween.get(bird)
+	            .to({y:bird.y + 200, rotation: 90}, (DURATION)/1.5, Factory.Ease.linear) //rotate back
+	            .call(Bird.dive, [], {}) // change bird to diving position
+	            .to({y:game.floor.y - 30}, (game.frameHeight - (bird.y + 200))/1.5, Factory.Ease.linear); //drop to the environment.floor
+        
+        },
+        reset: function(frameWidth, frameHeight) {
+        	Factory.Tween.removeTweens(bird);
+	        bird.x = frameWidth / 2;
+	        bird.y = frameHeight / 2;
+	        bird.rotation = 0;
+
+	        Factory.Tween.get(bird, {loop:true})
+	            .to({y:(frameHeight / 2) + WIGGLE}, DURATION, Factory.Ease.sineInOut)
+	            .to({y:(frameHeight / 2)}, DURATION, Factory.Ease.sineInOut);
         }
     }
 }());

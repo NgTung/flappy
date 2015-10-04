@@ -1,4 +1,5 @@
 'use strict';
+
 var Factory = createjs;
 
 var FlappyBird = (function() {
@@ -8,6 +9,7 @@ var FlappyBird = (function() {
     var startJump = false;
     var scoreShow = false;
     var dead = false;
+    var pipeDistance = PIPE_DISTANCE;
 
     function init() {
         Environment.setup();
@@ -59,37 +61,29 @@ var FlappyBird = (function() {
         if (startJump) {
             startJump = false;
             Bird.fly();
-            game.rotationDelta = game.bird.rotation < 0 ? (-game.bird.rotation - 20) / 5 : (game.bird.rotation + 20) / 5;
-
-            Factory.Tween.get(game.bird)
-                .to({y:game.bird.y - game.rotationDelta, rotation: - 20}, game.rotationDelta, Factory.Ease.linear) //rotate to jump position and jump bird
-                .to({y:game.bird.y - JUMP_AMOUNT, rotation: - 20}, JUMP_TIME - game.rotationDelta, Factory.Ease.quadOut) //rotate to jump position and jump bird
-                .to({y:game.bird.y}, JUMP_TIME, Factory.Ease.quadIn) //reverse jump for smooth arch
-                .to({y:game.bird.y + 200, rotation: 90}, (DURATION)/1.5, Factory.Ease.linear) //rotate back
-                .call(Bird.dive, [], {}) // change bird to diving position
-                .to({y:game.floor.y - 30}, (game.frameHeight - (game.bird.y+200))/1.5, Factory.Ease.linear); //drop to the bedrock
+            Bird.jump(game);
         }
 
         if (started && !dead) {
             // environment.floor scroll animation
             game.floor.x = (game.floor.x - scrollAnimationSpeed) % game.floor.tileW;
 
-            if (PIPE_DISTANCE === 0) {
+            if (pipeDistance === 0) {
                 game.pipe = new Factory.Bitmap(game.resource.getResult(ResourceName.PIPE));
                 game.pipe.x = game.frameWidth + 600;
                 game.pipe.y = (game.floor.y - GAP * 2) * Math.random() + GAP * 1.5;
                 game.pipes.addChild(game.pipe);
 
-                var pipeReverse = new Factory.Bitmap(game.resource.getResult(ResourceName.PIPE));
-                pipeReverse.scaleX = -1;
-                pipeReverse.rotation = 180; // rotate 180
-                pipeReverse.x = game.pipe.x;
-                pipeReverse.y = game.pipe.y - GAP;
-                game.pipes.addChild(pipeReverse);
+                var pipeRotated = new Factory.Bitmap(game.resource.getResult(ResourceName.PIPE));
+                pipeRotated.scaleX = -1;
+                pipeRotated.rotation = 180; // rotate 180
+                pipeRotated.x = game.pipe.x;
+                pipeRotated.y = game.pipe.y - GAP;
+                game.pipes.addChild(pipeRotated);
 
-                PIPE_DISTANCE = MASTER_PIPE_DISTANCE;
+                pipeDistance = MASTER_PIPE_DISTANCE;
             } else {
-                PIPE_DISTANCE--;
+                pipeDistance--;
             }
 
             for (var pIndex = 0; pIndex < pipesChildNum; pIndex++) {
@@ -100,7 +94,7 @@ var FlappyBird = (function() {
 
                 // validator of collision
                 var collision = ndgmr.checkRectCollision(game.pipe, game.bird);
-                if (collision && (!(collision.width < 8 || collision.height < 8))) { // if environment.bird hit on pipe
+                if (collision && (!(collision.width < 8 || collision.height < 8))) { // if bird hit on pipe
                     die();
                 }
 
@@ -131,17 +125,12 @@ var FlappyBird = (function() {
         dead = true;
 
         Bird.dive();
-        Factory.Tween.removeTweens(game.bird);
-
-        // Set bird dropped on the floor
-        Factory.Tween.get(game.bird)
-            .to({y:game.bird.y + 200, rotation: 90}, (DURATION)/1.5, Factory.Ease.linear) //rotate back
-            .call(Bird.dive, [], {}) // change bird to diving position
-            .to({y:game.floor.y - 30}, (game.frameHeight - (game.bird.y + 200))/1.5, Factory.Ease.linear); //drop to the environment.floor
+        Bird.dead();
+        
         // Flash the screen
         Factory.Tween.get(game.frame)
-            .to({alpha:0}, 100, Factory.Ease.linear)
-            .to({alpha:1}, 100, Factory.Ease.linear);
+            .to({alpha:0}, 100, Factory.Ease.linear) // set screen to white in 0.1 second
+            .to({alpha:1}, 100, Factory.Ease.linear); // reset screen to normal
 
         // Create and show restart button
         restartBtn = new Factory.Bitmap(game.resource.getResult(ResourceName.RESTART_BUTTON));
@@ -152,44 +141,23 @@ var FlappyBird = (function() {
         game.frame.addChild(restartBtn);
         Factory.Tween.get(restartBtn)
             .to({alpha:1, y: restartBtn.y + 50}, 400, createjs.Ease.sineIn)
-            .call(restartClickListener, [], {});
+            .call(function(){ restartBtn.addEventListener(Event.CLICK, restart); }, [], {});
     }
     function restart() {
         // reset screen
-        game.pipes.removeAllChildren();
-
         Factory.Tween.get(restartBtn)
             .to({y:restartBtn.y + 10}, 50, Factory.Ease.sineIn)
-            .call(removeStart, [], {});
-
-        game.score.text = 0;
-        game.score.alpha = 0;
-        game.scoreOutline.text = 0;
-        game.scoreOutline.alpha = 0;
+            .call(function(){ game.frame.removeChild(restartBtn); }, [], {});
 
         scoreShow = false;
-        PIPE_DISTANCE = MASTER_PIPE_DISTANCE;
+        pipeDistance = MASTER_PIPE_DISTANCE;
         dead = false;
         started = false;
         startJump = false;
 
-        var startX = game.frameWidth / 2;
-        var startY = game.frameHeight / 2;
-
-        Factory.Tween.removeTweens(game.bird);
-        game.bird.x = startX;
-        game.bird.y = startY;
-        game.bird.rotation = 0;
-
-        Factory.Tween.get(game.bird, {loop:true})
-            .to({y:startY + WIGGLE}, DURATION, Factory.Ease.sineInOut)
-            .to({y:startY}, DURATION, Factory.Ease.sineInOut);
-    }
-    function removeStart() {
-        game.frame.removeChild(restartBtn);
-    }
-    function restartClickListener() {
-        restartBtn.addEventListener(Event.CLICK, restart);
+        Pipe.reset(game);
+        Score.reset(game);
+        Bird.reset(game.frameWidth, game.frameHeight);
     }
 
     return {

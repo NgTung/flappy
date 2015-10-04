@@ -4,7 +4,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Flappy Bird</title>
+    <script src="Constant.js"></script>
+    <script type="text/javascript">
+        document.write("<title>" + GAME_NAME + "</title>");
+    </script>
     <!--
         Game library.
         src:
@@ -33,11 +36,10 @@
     <script src="component/Button.js"></script>
     <script src="component/Score.js"></script>
 
-    <script src="Constant.js"></script>
     <script src="Environment.js"></script>
 </head>
 
-<body onload="FlappyBird.init();" style="text-align: center;">
-    <canvas id="gameFrame" style="height: 100%; max-width: 100%;" height="1024" width="768"></canvas>
+<body onload="FlappyBird.init();" style="text-align:center;">
+    <canvas id="gameFrame" style="height:100%; max-width:100%;" height="1024" width="768"></canvas>
 </body>
 </html>

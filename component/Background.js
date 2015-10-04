@@ -1,6 +1,8 @@
 /**
  * Created by tungnt on 26/09/2015.
  */
+ 'use strict';
+ 
 var Background = (function () {
     var resourcePath = "resource/background.png";
 

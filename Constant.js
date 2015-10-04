@@ -1,10 +1,12 @@
+var GAME_NAME = "Flappy Bird HTML";
+
 var JUMP_AMOUNT = 120;
 var JUMP_TIME = 266;
 var FRAME_RATE_ON_START = 20;
 var FRAME_RATE_ON_PLAY = 60;
 var DURATION = 380;
 
-/* The gap between pipe and pipe reversed */
+/* The gap between pipe and pipe rotated */
 var GAP = 250;
 
 /* distance between 2 pipes */

@@ -1,6 +1,8 @@
 /**
  * Created by tungnt on 27/09/2015.
  */
+ 'use strict';
+ 
 var Score = (function () {
     var type = {
         TEXT : "text",
@@ -33,6 +35,12 @@ var Score = (function () {
             }
 
             return score;
+        },
+        reset: function(game){
+        	game.score.text = 0;
+	        game.score.alpha = 0;
+	        game.scoreOutline.text = 0;
+	        game.scoreOutline.alpha = 0;
         }
     }
 }());
